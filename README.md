@@ -1,13 +1,14 @@
 # obsidianizer
-Library to enhance your knowledge base, especially designed to combine it [Obsidian vaults](https://obsidian.md/), adding advanced functionalities on top. 
+Library to enhance your [Obsidian vaults](https://obsidian.md/) knowledge base.
 
 # Features
-Its main features are:
-- Email journal logging: Write your thoughts during the day as entried in your email drafts. Then use obsidianizer to dump them into a latex file to be processed later.
-- Latex processing: Load the journal entries previously stored ()
-- Pdf processing: Automatically read the highlighed text and associated comments from your pdfs. You can then convert them to obsidian vaults.
-- Obsidian vault processing: Load and create Vaults from your read pdfs and journals. Combine 
-- NLP processing: The library comes with a set of functionalities to analyze the vaults. 
+
+Obsidianier offers a set of advanced features to create and process Obsidian vaults, these include:
+- **Email journal logging**: Write your thoughts during the day as entried in your email drafts. Then use obsidianizer to dump them into a latex file to be processed later.
+- **Latex processing**: Load the journal entries previously stored ()
+- **Pdf processing**: Automatically read the highlighed text and associated comments from your pdfs. You can then convert them to obsidian vaults.
+- **Obsidian vault** processing: Load and create Vaults from your read pdfs and journals. Combine 
+- **NLP processing**: The library comes with a set of functionalities to analyze the vaults. 
 
 
 # Installation
@@ -48,7 +49,7 @@ pip3 install -U sentence-transformers
 
 # Examples
 
-The [notebooks](./notebooks/) act as exmaples, documentation and test.
+The [notebooks](./notebooks/) act as exmaples, documentation and test. The best way to become familiar with the API and its functionalities is to execute the [documentation notebooks](./notebooks/documentation) in order. 
 
 
 # Scripts 
