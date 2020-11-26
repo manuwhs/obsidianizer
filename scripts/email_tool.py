@@ -3,7 +3,7 @@ from obsidianizer.email_tools.email_handler import EmailHandler
 
 
 @click.group(
-    help="""Tool to download and delete emails from folders. Example usage: 
+    help="""Tool to download and delete emails from folders in your email service provider. Example usage: 
 
     1) List the available folders in your account:\n
         python email_tool.py folders -u your_email@gmail.com

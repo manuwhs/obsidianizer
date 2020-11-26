@@ -16,6 +16,9 @@ app/uploads/
 # Test notebooks.
 notebooks/test_outcomes/*.ipynb
 
+# environment 
+obsidianizer_env/*
+
 # Distribution / packaging
 .Python
 build/

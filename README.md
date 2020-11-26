@@ -11,31 +11,69 @@ Its main features are:
 
 
 # Installation
-```
-pip install obsidianizer
+
+This repo is not in [pypi](https://pypi.org/) yet. It requires the installation of other tools and models to be executed. The [bootstrap_environment.sh](./bootstrap_environment.sh) file contains the set of command line instructions to set a development environment from scratch in Ubuntu. Please feel free to cherry pick the parts you need.
+
+``` bash
+# Packages related to python to install
+sudo apt install python-pip
+sudo apt-get install python3-venv
+python3 -m pip install --user virtualenv
+
+# Create virtual environment
+python3 -m venv obsidianizer_env
+source obsidianizer_env/bin/activate
+pip3 install --upgrade pip
+
+# Install numba for later package installation
+pip3 install numba 
+
+# We need to install pymupdf this way first
+pip3 install -U pymupdf
+
+# Install the obsidianizer library
+git clone https://github.com/manuwhs/obsidianizer.git 
+cd obsidianizer
+pip3 install -e .   # Install in development mode.
+
+# Download additional packages for different advanced libraries
+python -m spacy download es
+python -m spacy download en
+python -m spacy download en_core_web_md
+python -m spacy download es_core_news_md
+
+pip3 install pyspellchecker
+pip3 install -U sentence-transformers
 ```
 
 # Examples
 
 The [notebooks](./notebooks/) act as exmaples, documentation and test.
 
+
 # Scripts 
 
-The [scripts](./scripts/) folder contains a set of CLI utilities to make use of different utilities:
-- [email_tools.pu](./scripts/email_tools.py): Tool to download emails in latex format.
+The [scripts](./scripts/) folder contains a set of CLI utilities. Most of the functionalities of this repo are accessed through the notebooks and the webapp as they require more complex inputs. These utilities contain simple specific use cases:
 
-## Setting up the environment
-```
-pip install obsidianizer
-```
+- [email_tools.py](./scripts/email_tools.py): Tool to mainly download emails in latex format.
+
 
 # Webapp 
 
-A basic [webapp](./app/) has been developed to make use of the obsidian functionalities in a more user friendly manner. Not much time has been allocated to explain it. It is what it is.
+A basic [webapp](./app/) has been developed to make use of the obsidian functionalities in a more user friendly manner. Not much time has been allocated to explain it. It is what it is for now. In order to execute it, chage directory to the [app](./app/) folder and execute the main.py file:
+
+```
+cd app
+python3 main.py
+```
 
 # Run CI
 
-The CI will run mypy and flake8 through the code
+The CI pipeline will:
+    - Format the code and look for inconsistencies: It uses black, mypy and flake8.
+    - Run tests: It will run the notebooks in 
+    - It will clean the cells of all notebooks so that they are cleared before commiting the code.
+
 ```
 bash ci.sh
 ```

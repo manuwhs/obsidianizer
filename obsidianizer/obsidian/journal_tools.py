@@ -5,7 +5,9 @@ import pandas as pd
 from obsidianizer.latex_tools.utils import DATETIME_FORMAT_MINUTE, str_to_date
 
 
-def get_vault_df_from_journal(journal_df: pd.DataFrame, vault_path: str = "./Journal_vault/"):
+def get_vault_df_from_journal(
+    journal_df: pd.DataFrame, vault_path: str = "./Journal_vault/"
+):
     """Returns a dataframe containing a vault of the diaries.
     The filepath architecture is: YYYY/MM/DD/HH/
     TODO: Rethink the name and hierarchy of folders.
@@ -49,7 +51,9 @@ def get_journal_entries_from_vault(vault_df: pd.DataFrame) -> pd.DataFrame:
             sentences = entry_text.split("\n")
 
             datetime_list.append(sentences[0])
-            entry_text_list.append("\n\n".join([sentences[i] for i in range(1, len(sentences))]))
+            entry_text_list.append(
+                "\n\n".join([sentences[i] for i in range(1, len(sentences))])
+            )
 
     dictionary = {"datetime_str": datetime_list, "entry_text": entry_text_list}
 
@@ -64,5 +68,9 @@ def get_journal_entry_filepath(datetime: dt.datetime) -> Tuple[str, str]:
 
 
 def get_journal_entry_markdown(entry: pd.Series) -> str:
-    text = entry["datetime"].strftime(DATETIME_FORMAT_MINUTE) + "\n" + "\n".join(entry["sentences"])
+    text = (
+        entry["datetime"].strftime(DATETIME_FORMAT_MINUTE)
+        + "\n"
+        + "\n".join(entry["sentences"])
+    )
     return text

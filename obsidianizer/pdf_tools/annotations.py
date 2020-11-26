@@ -31,12 +31,25 @@ def extract_annotation(annot: fitz.fitz.Annot, page: fitz.fitz.Page) -> ANNOTATI
     is_subcomment = annot.vertices is None
 
     if is_subcomment:
-        datetime = dt.datetime.strptime(annot.info["modDate"][2:-6], ANNOTATION_DATETIME_FORMAT)
+        datetime = dt.datetime.strptime(
+            annot.info["modDate"][2:-6], ANNOTATION_DATETIME_FORMAT
+        )
     else:
-        datetime = dt.datetime.strptime(annot.info["creationDate"][2:-6], ANNOTATION_DATETIME_FORMAT)
-    annotated_text = "[" + datetime.strftime(DATETIME_FORMAT_MINUTE) + "] " + author + "\n" + annotated_text
+        datetime = dt.datetime.strptime(
+            annot.info["creationDate"][2:-6], ANNOTATION_DATETIME_FORMAT
+        )
+    annotated_text = (
+        "["
+        + datetime.strftime(DATETIME_FORMAT_MINUTE)
+        + "] "
+        + author
+        + "\n"
+        + annotated_text
+    )
 
-    return ANNOTATION(highlighted_text, annotated_text, *annot.rect, is_subcomment, datetime, author)  # noqa
+    return ANNOTATION(
+        highlighted_text, annotated_text, *annot.rect, is_subcomment, datetime, author
+    )  # noqa  # noqa
 
 
 def _extract_annot(annot: fitz.fitz.Annot, words_on_page: List[Any]) -> str:
@@ -64,10 +77,14 @@ def find_position_candidates_in_list(
     in the ordered list list_df[column]"""
 
     # Replicate the original list to compare by the number of elements we are gonna compare it with
-    repeated_list_df = np.repeat(list_df[[column]].values, candidate_df.shape[0], axis=1)
+    repeated_list_df = np.repeat(
+        list_df[[column]].values, candidate_df.shape[0], axis=1
+    )
 
     # Compare the values in candidate_df[column] with all the ones in list_df[column]
     # Finding where it falsl
-    position_candidates_in_list = np.sum(np.array(candidate_df[column]) > repeated_list_df, axis=0) - 1
+    position_candidates_in_list = (
+        np.sum(np.array(candidate_df[column]) > repeated_list_df, axis=0) - 1
+    )
 
     return position_candidates_in_list
