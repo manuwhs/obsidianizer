@@ -7,6 +7,23 @@ from TexSoup import TexSoup
 DATETIME_FORMAT_HOUR = "%a, %d %b %Y %H"
 DATETIME_FORMAT_MINUTE = "%a, %d %b %Y %H:%M"
 
+LATEX_DOCUMENT_HEADER = """\\documentclass{article}
+\\usepackage{geometry}
+\\geometry{
+    a4paper,
+    total={160mm,255mm},
+    left=35mm,
+    top=20mm,
+}
+\\begin{document}
+\\begin{itemize}
+
+"""
+LATEX_DOCUMENT_ENDING = """
+\\end{itemize}
+\\end{document}
+"""
+
 
 def preprocess_email_text(text: str) -> str:
     """The text returned by email has peculiarities to avoid"""
@@ -97,12 +114,13 @@ def save_cleaned_sentences_to_latex(df: pd.DataFrame, filepath: str) -> str:
     It does it based on the "sentences" and "datetime" columns.
     """
     df = df.copy()
-    text = r""
+    text = r"" + LATEX_DOCUMENT_HEADER
 
     df["latex_entry"] = df["sentences"].map(lambda x: "\n\n".join(x))
     for index, row in df.iterrows():
         text += parse_dated_comment_to_latex_item(row["latex_entry"], row["datetime"])
 
+    text += LATEX_DOCUMENT_ENDING
     with open(filepath, mode="w") as f:
         f.write(text)
 

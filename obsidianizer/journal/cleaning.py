@@ -9,24 +9,30 @@ from obsidianizer.latex_tools.utils import (
     save_cleaned_sentences_to_latex,
 )
 
+JOURNAL_SPLIT_BY_LANGUAGE_PREFIX = "journal_split_language_"
 
-def write_to_disk_split_journals(
+
+def write_journal_splits_by_language_to_latex(
     journal_df: pd.DataFrame, path: str = "../../../knowledge/"
 ) -> None:
     """Splits the journal into its languages and writes different journal files for each language"""
 
-    journal_language_groupby = split_journal_by_languages(journal_df)
+    journal_language_groupby = split_journal_by_language(journal_df)
 
     for language in journal_language_groupby.groups.keys():
-        output_cleaned_journal = f"{path}/journal_split_language_{language}.txt"
+        output_cleaned_journal = (
+            f"{path}/{JOURNAL_SPLIT_BY_LANGUAGE_PREFIX}{language}.tex"
+        )
         df_language = journal_language_groupby.get_group(language)
         _ = save_cleaned_sentences_to_latex(df_language, output_cleaned_journal)
 
 
-def load_journals_splitted_languages(path: str = "../../../knowledge/") -> pd.DataFrame:
+def load_journals_splitted_by_language(
+    path: str = "../../../knowledge/",
+) -> pd.DataFrame:
     """Loads and joins all the files related to language journal in the path"""
     journal_languages_list = []
-    language_splits_filepaths = get_language_journal_splits_in_filedir(path)
+    language_splits_filepaths = get_journal_splits_by_language_filepaths(path)
     for filepath in language_splits_filepaths:
         journal_languages_list.append(load_drafts_entries(filepath))
 
@@ -40,21 +46,23 @@ def load_journals_splitted_languages(path: str = "../../../knowledge/") -> pd.Da
         )
 
 
-def get_language_journal_splits_in_filedir(path: str) -> List[str]:
+def get_journal_splits_by_language_filepaths(path: str) -> List[str]:
     """Returns the list of the splited language files in the given filedir"""
-    filepaths = [f for f in glob.glob(path + "**/*.txt", recursive=True)]
+    filepaths = [f for f in glob.glob(path + "**/*.tex", recursive=True)]
     language_splits_filepaths = [
-        filepath for filepath in filepaths if "journal_split_language_" in filepath
+        filepath
+        for filepath in filepaths
+        if JOURNAL_SPLIT_BY_LANGUAGE_PREFIX in filepath
     ]
     return language_splits_filepaths
 
 
-def get_language_split_journal_file_path(path: str, language: str) -> str:
+def get_journal_split_by_language_filepath(path: str, language: str) -> str:
     """Bakes path for the journal split by language"""
-    return f"{path}/journal_split_language_{language}.txt"
+    return f"{path}/journal_split_language_{language}.tex"
 
 
-def split_journal_by_languages(
+def split_journal_by_language(
     journal_df: pd.DataFrame,
 ) -> pd.core.groupby.DataFrameGroupBy:  # Dict[str, pd.Index]:
     """It splits each entry in the journal into their languages groups and return

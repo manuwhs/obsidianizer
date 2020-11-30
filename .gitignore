@@ -1,5 +1,4 @@
 # Temporarily do not include test data and example notebooks.
-notebooks/examples/
 tests/data/
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -18,6 +17,10 @@ notebooks/test_outcomes/*.ipynb
 
 # environment 
 obsidianizer_env/*
+
+# email script downloads
+scripts/*.txt
+scripts/*.tex
 
 # Distribution / packaging
 .Python

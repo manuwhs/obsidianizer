@@ -1,5 +1,6 @@
 import os
 import re
+from typing import List
 
 
 def preprocess_folder_name(folder_name: str) -> str:
@@ -26,3 +27,10 @@ def add_annotation_to_obsidian_tree(filename: str, text: str) -> None:
     fp = open(filename, append_write)
     fp.write(text)
     fp.close()
+
+
+def get_backlinks(text: str) -> List[str]:
+    """Returns a list with the backlinks in the given text"""
+    backlinks = re.findall(r"\[\[.*?\]\]", text)
+    backlinks = [backlink[2:-2] for backlink in backlinks]
+    return backlinks

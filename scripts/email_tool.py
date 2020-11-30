@@ -38,7 +38,10 @@ def folders(user: str, password: str):
 @click.option("-p", "--password", help="Password of the email address", required=True, prompt=True, hide_input=True)
 @click.option("-f", "--email_folder", default="[Gmail]/Kladder", help="Email folder to download")
 @click.option(
-    "-o", "--output", default="./drafts.txt", help="Filename of the output file where the emails will be stored"
+    "-o",
+    "--output",
+    default="./email_downloads",
+    help="Filename of the output file where the emails will be stored",
 )
 def download(user: str, password: str, email_folder: str, output: str):
 

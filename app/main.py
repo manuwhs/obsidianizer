@@ -18,23 +18,17 @@ from callback_funcs import (
     handle_input_range_dates,
     save_files,
 )
-from data_loading import (
-    get_journal_df,
-    initial_dashboard_charts,
-    store_data_to_download,
-)
+from data_loading import get_journal_df, initial_dashboard_charts, store_data_to_download
 from layout import get_layout
-from layout_visualization import (
-    create_n_grams_visualization,
-    create_statistics_visualization,
-)
+from layout_visualization import create_n_grams_visualization, create_statistics_visualization
 from utils import UPLOAD_DIRECTORY, create_settings_dict, filter_journal
 
 # from flask.helpers import send_file
 
+JOURNAL_FILEPATH = "downloadable/caca.tex"
 
 # Load the data initially
-journal_df = get_journal_df("../../knowledge/caca.txt")
+journal_df = get_journal_df(JOURNAL_FILEPATH)
 
 pdf_dict: Dict[str, Any] = {"filepath": None, "fitz_doc": None, "images": None}
 # Layout config
@@ -79,9 +73,7 @@ def render_basic_information(n_clicks: int, settings_dict: dict):
 )
 def update_settings_data(start_date: str, end_date: str, languages: List[str]):
     """It updates the settings so that they are shared everywhere"""
-    start_date_object, end_date_object = handle_input_range_dates(
-        journal_df, start_date, end_date
-    )
+    start_date_object, end_date_object = handle_input_range_dates(journal_df, start_date, end_date)
     settings_dict = create_settings_dict(start_date_object, end_date_object, languages)
     return [settings_dict]
 
@@ -94,10 +86,10 @@ def update_settings_data(start_date: str, end_date: str, languages: List[str]):
 def download_data(n_clicks: int, settings_dict: dict):
 
     if n_clicks is None or n_clicks == 0:
-        return ["downloadable/caca.txt"]
+        return ["downloadable/caca.tex"]
 
     store_data_to_download(journal_df, settings_dict)
-    return ["downloadable/caca.txt"]
+    return ["downloadable/caca.tex"]
 
 
 @app.callback(

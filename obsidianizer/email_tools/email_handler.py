@@ -8,7 +8,11 @@ from obsidianizer.email_tools.utils import (
     get_email_datetime,
     get_first_text_block,
 )
-from obsidianizer.latex_tools.utils import parse_dated_comment_to_latex_item
+from obsidianizer.latex_tools.utils import (
+    LATEX_DOCUMENT_ENDING,
+    LATEX_DOCUMENT_HEADER,
+    parse_dated_comment_to_latex_item,
+)
 
 
 class EmailHandler(object):
@@ -78,13 +82,13 @@ class EmailHandler(object):
         return email_message
 
     def download_emails_to_latex(
-        self, folder: str = "[Gmail]/Drafts", filepath: str = "./drafts.txt"
+        self, folder: str = "[Gmail]/Drafts", filename: str = "./email_downloads"
     ) -> str:
         """Saves all of the drafts into disk with latex format"""
 
         draft_uids = self.search_uids(folder=folder)
         n_emails = len(draft_uids)
-        all_text = ""
+        all_text = LATEX_DOCUMENT_HEADER
 
         print("Total emails: ", n_emails)
 
@@ -99,10 +103,11 @@ class EmailHandler(object):
 
             text = parse_dated_comment_to_latex_item(text, datetime)
             all_text += text
+        all_text += LATEX_DOCUMENT_ENDING
 
         print("All emails downloaded")
         dump_date = dt.datetime.now()
-        fd = open("drafts_" + str(dump_date) + ".txt", "w+")
+        fd = open(f"{filename}_({str(dump_date)}).tex", "w+")
         fd.write(all_text)
         fd.close()
 

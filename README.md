@@ -79,3 +79,4 @@ The CI pipeline will:
 bash ci.sh
 ```
 
+# DISCLAIMER: So far this repo does not contain the test data as it is private. In the future it will be replace with public information.

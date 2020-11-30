@@ -37,7 +37,7 @@ def get_data_selection_tab(journal_df: pd.DataFrame) -> dcc.Tab:
             html.Button("Store data", id="store-data-button", n_clicks=0),
             html.Form(
                 id="download-form",
-                action="downloadable/caca.txt",
+                action="downloadable/caca.tex",
                 method="get",
                 children=[
                     html.Button(

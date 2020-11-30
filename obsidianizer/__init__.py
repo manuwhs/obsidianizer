@@ -6,8 +6,8 @@ JOURNALS_PATH = tests_data_path + "journal/"
 PDFS_PATH = tests_data_path + "pdf/"
 VAULTS_PATH = tests_data_path + "vault/"
 
-EXAMPLE_JOURNAL_PATH = JOURNALS_PATH + "Randiary.txt"
-EXAMPLE_CLEANED_JOURNAL_PATH = JOURNALS_PATH + "Randiary_cleaned.txt"
+EXAMPLE_JOURNAL_PATH = JOURNALS_PATH + "Randiary.tex"
+EXAMPLE_CLEANED_JOURNAL_PATH = JOURNALS_PATH + "Randiary_cleaned.tex"
 
 EXAMPLE_ECCE_HOMMO_PDF_PATH = PDFS_PATH + "Ecce_Hommo.pdf"
 EXAMPLE_ECCE_HOMMO_VAULT_PATH = VAULTS_PATH + "Ecce_Hommo/"
