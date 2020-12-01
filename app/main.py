@@ -18,9 +18,16 @@ from callback_funcs import (
     handle_input_range_dates,
     save_files,
 )
-from data_loading import get_journal_df, initial_dashboard_charts, store_data_to_download
+from data_loading import (
+    get_journal_df,
+    initial_dashboard_charts,
+    store_data_to_download,
+)
 from layout import get_layout
-from layout_visualization import create_n_grams_visualization, create_statistics_visualization
+from layout_visualization import (
+    create_n_grams_visualization,
+    create_statistics_visualization,
+)
 from utils import UPLOAD_DIRECTORY, create_settings_dict, filter_journal
 
 # from flask.helpers import send_file
@@ -73,7 +80,9 @@ def render_basic_information(n_clicks: int, settings_dict: dict):
 )
 def update_settings_data(start_date: str, end_date: str, languages: List[str]):
     """It updates the settings so that they are shared everywhere"""
-    start_date_object, end_date_object = handle_input_range_dates(journal_df, start_date, end_date)
+    start_date_object, end_date_object = handle_input_range_dates(
+        journal_df, start_date, end_date
+    )
     settings_dict = create_settings_dict(start_date_object, end_date_object, languages)
     return [settings_dict]
 

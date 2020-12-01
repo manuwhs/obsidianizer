@@ -59,11 +59,13 @@ def join_vaults(
 ) -> pd.DataFrame:
     """Joins two vautls together.
     If merge_keywords is True, it will look for the keywords in vault_left and associate them to
+    It resets the index.
+
     TODO: Check for duplicated keywords, probably include the relative path as well to avoid conflicts.
     How to choose which one gets selected?
     """
+    if merge_keywords:
+        tokens_to_highlight = vault_right["keyword"].unique()
+        vault_left = highlight_tokens_in_vault(vault_left, tokens_to_highlight)
 
-    tokens_to_highlight = vault_right["keyword"].unique()
-    vault_left = highlight_tokens_in_vault(vault_left, tokens_to_highlight)
-
-    return pd.concat([vault_left, vault_right])
+    return pd.concat([vault_left, vault_right]).reset_index(drop=True)

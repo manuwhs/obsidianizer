@@ -7,6 +7,16 @@ from TexSoup import TexSoup
 DATETIME_FORMAT_HOUR = "%a, %d %b %Y %H"
 DATETIME_FORMAT_MINUTE = "%a, %d %b %Y %H:%M"
 
+
+class WrongDatetimeFormatError(Exception):
+    def __init__(self, datetime_str: str):
+        message = f"""The datetime string: {datetime_str} does not follow the allowed formats:
+        Allowed formats:
+            - {DATETIME_FORMAT_HOUR}
+            - {DATETIME_FORMAT_MINUTE}"""
+        super().__init__(message)
+
+
 LATEX_DOCUMENT_HEADER = """\\documentclass{article}
 \\usepackage{geometry}
 \\geometry{
@@ -67,6 +77,8 @@ def parse_dated_comment_to_latex_item(text: str, datetime: dt.datetime) -> str:
 def str_to_date(datetime_str: str) -> dt.datetime:
     """Parse string data to datetime"""
 
+    datetime_dt = None
+
     try:
         datetime_dt = dt.datetime.strptime(datetime_str, DATETIME_FORMAT_MINUTE)
     except:  # noqa
@@ -76,6 +88,9 @@ def str_to_date(datetime_str: str) -> dt.datetime:
         datetime_dt = dt.datetime.strptime(datetime_str, DATETIME_FORMAT_HOUR)
     except:  # noqa
         pass
+
+    if datetime_dt is None:
+        raise WrongDatetimeFormatError(datetime_str)
 
     return datetime_dt
 
