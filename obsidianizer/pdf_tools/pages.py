@@ -3,7 +3,11 @@ from typing import Callable, List
 import fitz
 import pandas as pd
 from obsidianizer.pdf_tools import WORD_IN_PAGE
-from obsidianizer.pdf_tools.annotations import ANNOTATION, extract_annotation
+from obsidianizer.pdf_tools.annotations import (
+    ANNOTATION,
+    AnnotationExtractionMode,
+    extract_annotation,
+)
 
 
 def get_words_data_frame(page: fitz.fitz.Page) -> pd.DataFrame:
@@ -56,12 +60,15 @@ def compute_block_absolute_y0(df: pd.DataFrame):
     return block_absolute_y0
 
 
-def extract_page_annotations(page: fitz.fitz.Page) -> pd.DataFrame:
+def extract_page_annotations(
+    page: fitz.fitz.Page,
+    mode: AnnotationExtractionMode = AnnotationExtractionMode.ONLY_HIGHLIGHTED_TEXT,
+) -> pd.DataFrame:
     """Returns a pandas dataframe with the anotations and their rectanble"""
     annotation_list: List[ANNOTATION] = []
     annot = page.firstAnnot
     while annot is not None:
-        annotation = extract_annotation(annot, page)
+        annotation = extract_annotation(annot, page, mode)
         annot = annot.next
 
         # If the annotation is a subcomment, just add them together

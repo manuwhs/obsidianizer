@@ -1,10 +1,12 @@
-from typing import Any, List
+from typing import Tuple
 
 import fitz
 
 
 def _check_contain(
-    r_word: fitz.Rect, points: List[Any], _threshold_intersection: float = 0.2
+    r_word: fitz.Rect,
+    points: Tuple[float, float, float, float],
+    _threshold_intersection: float = 0.2,
 ) -> bool:
     """If `r_word` is contained in the rectangular area.
 

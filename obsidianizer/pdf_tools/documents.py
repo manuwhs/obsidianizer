@@ -2,6 +2,7 @@ from typing import Any, Callable, List, Sequence
 
 import fitz
 import pandas as pd
+from obsidianizer.pdf_tools.annotations import AnnotationExtractionMode
 from obsidianizer.pdf_tools.pages import extract_page_annotations, get_filtered_blocks
 
 
@@ -34,7 +35,12 @@ def get_book_filtered_blocks(
     return pd.concat(all_subsections).reset_index(drop=True)
 
 
-def extract_book_annotations(book: List[fitz.Page]) -> pd.DataFrame:
+def extract_book_annotations(
+    book: List[fitz.Page],
+    mode: AnnotationExtractionMode = AnnotationExtractionMode.ONLY_HIGHLIGHTED_TEXT,
+) -> pd.DataFrame:
     """Returns the blocks across the pages which fullfill the given property"""
-    all_annotatoins = [extract_page_annotations(book[i]) for i in range(len(book))]
+    all_annotatoins = [
+        extract_page_annotations(book[i], mode=mode) for i in range(len(book))
+    ]
     return pd.concat(all_annotatoins).reset_index(drop=True)

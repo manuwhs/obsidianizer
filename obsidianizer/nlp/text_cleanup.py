@@ -148,13 +148,14 @@ def remove_stop_words(words_series: pd.Series) -> pd.Series:
     spacy_stopwords_es = sp_es.Defaults.stop_words
 
     text_without_stopword = [
-        word for word in words_series.index if word.lower() not in spacy_stopwords_en
+        word for word in words_series if word.lower() not in spacy_stopwords_en
     ]
     text_without_stopword = [
         word for word in text_without_stopword if word.lower() not in spacy_stopwords_es
     ]
 
-    words_series_filtered = words_series[text_without_stopword].map(str)
+    # words_series_filtered = words_series[text_without_stopword].map(str)
+    words_series_filtered = text_without_stopword
     return words_series_filtered
 
 

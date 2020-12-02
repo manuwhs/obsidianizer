@@ -69,6 +69,46 @@ def get_vault_df_from_pdf(
     return vault_df
 
 
+def get_vault_df_from_pdf_by_page(
+    annotations_blocks: pd.DataFrame,
+    filedir: str = "./Ecce/",
+) -> None:
+    """Creates the vault df for the given annotations, by page"""
+
+    filepaths = []
+    relative_keyword_paths = []
+    keywords = []
+    markdowns = []
+
+    # Annotation related
+    for annotation_i, annotation in annotations_blocks.iterrows():
+        annotation = annotations_blocks.iloc[annotation_i]
+
+        # Compute the folder structure and keyword by the page
+        subsection_dir = filedir + "book/" + str(annotation["page"]) + "/"
+        annotation_keyword = (
+            str(annotation["page"]) + "_y=" + str(int(annotation["y1"]))
+        )
+        filepath = subsection_dir + annotation_keyword + ".md"
+
+        markdown = get_annotation_obsidian_markdown(annotation)
+
+        filepaths.append(filepath)
+        relative_keyword_paths.append(subsection_dir)
+        keywords.append(annotation_keyword)
+        markdowns.append(markdown)
+
+    vault_dict = {
+        "filepath": filepaths,
+        "keyword": keywords,
+        "relative_keyword_path": relative_keyword_paths,
+        "markdown": markdowns,
+    }
+
+    vault_df = pd.DataFrame(vault_dict)
+    return vault_df
+
+
 def get_annotation_obsidian_markdown(annotation: pd.Series) -> str:
     """Transforms an annotation row into the text to be added to an obsidian md file"""
     highlighted_text = annotation["highlighted_text"]

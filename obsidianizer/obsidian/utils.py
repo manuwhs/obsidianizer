@@ -131,19 +131,25 @@ def get_subbacklinks_from_other_backlinks(
     return sub_backlinks_dict
 
 
-def add_sublinks_to_vault_df(vault_df: pd.DataFrame, relative_keyword_path: Optional[str] = None) -> pd.DataFrame:
+def add_sublinks_to_vault_df(
+    vault_df: pd.DataFrame, relative_keyword_path: Optional[str] = None
+) -> pd.DataFrame:
     """It adds at the end of the markdown, the related other backlinks among the given list.
     If relative_keyword_path is not None, it will only combine the within that relative keyword path
     """
 
     if relative_keyword_path is not None:
         n = len(relative_keyword_path)
-        vault_df = vault_df[vault_df["relative_keyword_path"][:n] == relative_keyword_path]
+        vault_df = vault_df[
+            vault_df["relative_keyword_path"][:n] == relative_keyword_path
+        ]
     else:
         vault_df = vault_df.copy()
 
     unique_backlinks = get_vault_df_unique_backlinks(vault_df)
-    sub_backlinks_dict = get_subbacklinks_from_other_backlinks(unique_backlinks, unique_backlinks)
+    sub_backlinks_dict = get_subbacklinks_from_other_backlinks(
+        unique_backlinks, unique_backlinks
+    )
 
     for long_backlink in sub_backlinks_dict.keys():
         related_backlinks_text = "\n\nRelated backlinks: "
@@ -152,7 +158,8 @@ def add_sublinks_to_vault_df(vault_df: pd.DataFrame, relative_keyword_path: Opti
 
         # Get the entry in the vault that has the keyword
         index_keyword = vault_df[
-            vault_df["keyword"].map(lambda x: x.encode("utf-8")) == long_backlink.encode("utf-8")
+            vault_df["keyword"].map(lambda x: x.encode("utf-8"))
+            == long_backlink.encode("utf-8")
         ].index
 
         # TODO: Handle duplicated keywords in the future
