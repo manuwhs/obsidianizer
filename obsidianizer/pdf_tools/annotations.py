@@ -88,7 +88,7 @@ def extract_annotation(
 
 def _get_ith_word_box_coordinates(
     vertices: List[float], i: int
-) -> Tuple[float, float, float, float]:
+) -> Tuple[float, float, float, float]:  # noqa
     box_coordinates = vertices[i * 4 : i * 4 + 4]  # noqa
     return box_coordinates  # noqa
 
@@ -155,44 +155,165 @@ def _extract_annot(
         sentence = "\n\n".join(blocks_data_quote)
 
     elif mode.value == AnnotationExtractionMode.ENTIRE_LINES.value:
-        # For each rectangle that makes up the quote, find the overlapping lines.
-        block_line_tuples = []
-        for i in range(quad_count):
-            box_coordinates = _get_ith_word_box_coordinates(quad_points, i)
-            words = [
-                w
-                for w in words_on_page
-                if _check_contain(fitz.Rect(w[:4]), box_coordinates)
-            ]
-            block_line_tuples.extend([(w[5], w[6]) for w in words])
+        unique_block_line_df = _get_unique_line_block_in_annotation(
+            quad_points, words_on_page
+        )
+        block_and_lines_data = _get_block_and_line_words_df(words_on_page)
 
-        # Get the unique blocks the line belongs to
-        words_df = pd.DataFrame(words_on_page, columns=WORD_IN_PAGE._fields)
-        words_df["block_and_line"] = (
-            words_df["block_no"].map(str) + "__" + words_df["line_no"].map(str)
-        )
-        blocks_data = words_df.groupby(["block_and_line"]).agg(
-            {"word": lambda x: " ".join(list(x))}
-        )
-
-        unique_block_line_df = pd.DataFrame(
-            block_line_tuples, columns=["block_no", "line_no"]
-        )
-        unique_block_line_df["block_and_line"] = (
-            unique_block_line_df["block_no"].map(str)
-            + "__"
-            + unique_block_line_df["line_no"].map(str)
-        )
-        unique_block_line_groups = (
-            unique_block_line_df.groupby(["block_and_line"]).first().index
-        )
-        # Join the block the quote belongs to
-        blocks_data_quote = blocks_data.loc[unique_block_line_groups]["word"]
-        sentence = " ".join(blocks_data_quote)
+        # Get the lines (from any block touched by the annotation)
+        blocks_data_annotations = block_and_lines_data.loc[unique_block_line_df]["word"]
+        sentence = " ".join(blocks_data_annotations)
 
     elif mode.value == AnnotationExtractionMode.SENTENCE.value:
-        raise Exception("Not implemented yet")
-    return sentence
+        unique_block_line_df = _get_unique_line_block_in_annotation(
+            quad_points, words_on_page
+        )
+        block_and_lines_data = _get_block_and_line_words_df(words_on_page)
+
+        # Get the lines (from any block touched by the annotation)
+        blocks_data_annotations = block_and_lines_data.loc[unique_block_line_df]["word"]
+        sentence = " ".join(blocks_data_annotations)
+
+        # Empty annotation
+        if len(unique_block_line_df) == 0:
+            return sentence
+
+        first_setence_beginning_text = _get_beginning_of_sentence_text(
+            unique_block_line_df, block_and_lines_data
+        )
+        last_setence_ending_text = _get_ending_of_sentence_text(
+            unique_block_line_df, block_and_lines_data
+        )
+        # Now we look for the beginning of the first sentence and the end of the last.
+        # These we find by finding a "." or the end of a block.
+        sentence = (
+            first_setence_beginning_text
+            + " "
+            + sentence
+            + " "
+            + last_setence_ending_text
+        )
+    return sentence.strip()
+
+
+def _get_unique_line_block_in_annotation(
+    quad_points: List[float], words_on_page: List[List[float]]
+) -> pd.DataFrame:
+    """Returs the (block,line) tuples that the quote belongs to."""
+    # Number of rectangles that make the quote
+    quad_count = int(len(quad_points) / 4)
+    block_line_tuples = []
+    # For each rectangle that makes up the quote, find the overlapping lines.
+    for i in range(quad_count):
+        box_coordinates = _get_ith_word_box_coordinates(quad_points, i)
+        words = [
+            w
+            for w in words_on_page
+            if _check_contain(fitz.Rect(w[:4]), box_coordinates)
+        ]
+        block_line_tuples.extend([(w[5], w[6]) for w in words])
+    unique_block_line_df = pd.DataFrame(
+        block_line_tuples, columns=["block_no", "line_no"]
+    )
+    unique_block_line_df["block_and_line"] = (
+        unique_block_line_df["block_no"].map(str)
+        + "__"
+        + unique_block_line_df["line_no"].map(str)
+    )
+    unique_block_line_df = (
+        unique_block_line_df.groupby(["block_and_line"]).first().index
+    )
+    return unique_block_line_df
+
+
+def _get_block_and_line_words_df(words_on_page: List[Tuple[float]]) -> pd.DataFrame:
+    """Return the unique blocks the line belongs to"""
+    words_df = pd.DataFrame(words_on_page, columns=WORD_IN_PAGE._fields)
+    words_df["block_and_line"] = (
+        words_df["block_no"].map(str) + "__" + words_df["line_no"].map(str)
+    )
+    block_and_lines_data = words_df.groupby(["block_and_line"]).agg(
+        {"word": lambda x: " ".join(list(x)), "line_no": "first", "block_no": "first"}
+    )
+    return block_and_lines_data
+
+
+def _get_beginning_of_sentence_text(
+    unique_block_line_df: pd.DataFrame, block_and_lines_data: pd.DataFrame
+) -> str:
+    """Returns all the text belonging to the first sentence which could be in the previous lines"""
+    first_sentece_block, first_sentence_line = [
+        int(x) for x in unique_block_line_df[0].split("__")
+    ]
+    first_setence_beginning_text = ""
+    while True:
+        if first_sentence_line > 0:  # Not at the top of the block
+            first_sentence_line = first_sentence_line - 1
+            index_value = f"{first_sentece_block}__{first_sentence_line}"
+
+            # If it is a blank line, we also stop
+            if index_value not in block_and_lines_data.index:
+                break
+            text_in_line = block_and_lines_data.loc[index_value]["word"]
+            start_of_sentence_position_in_line = text_in_line.find(".")
+            if start_of_sentence_position_in_line != -1:
+                if start_of_sentence_position_in_line != len(text_in_line) - 1:
+                    first_setence_beginning_text = (
+                        text_in_line[start_of_sentence_position_in_line + 1 :]
+                        + " "
+                        + first_setence_beginning_text
+                    )
+                break
+            else:
+                first_setence_beginning_text = (
+                    text_in_line + " " + first_setence_beginning_text
+                )
+
+        else:
+            # Go up to the previous block just in case basically.
+            if first_sentece_block > 0:
+                first_sentece_block -= 1
+                first_sentence_line = block_and_lines_data[
+                    block_and_lines_data["block_no"] == first_sentece_block
+                ]["line_no"].max()
+                continue
+            else:
+                break
+
+    return first_setence_beginning_text
+
+
+def _get_ending_of_sentence_text(
+    unique_block_line_df: pd.DataFrame, block_and_lines_data: pd.DataFrame
+) -> str:
+    """Returns all the text belonging to the last sentence which could be in the previous lines"""
+    last_sentence_block, last_sentence_line = [
+        int(x) for x in unique_block_line_df[0].split("__")
+    ]
+    last_setence_ending_text = ""
+
+    while True:
+        last_sentence_line = last_sentence_line + 1
+        index_value = f"{last_sentence_block}__{last_sentence_line}"
+
+        # If it is a blank line, we also stop (possibly end of block as well)
+        # TODO: It seems that the blocks are not so reliable, and we should look only at the logic of line.
+        # In the future we should simply compute 1000*block + line and do simple logic with it.
+        if index_value not in block_and_lines_data.index:
+            break
+        text_in_line = block_and_lines_data.loc[index_value]["word"]
+        end_of_sentence_position_in_line = text_in_line.find(".")
+        if end_of_sentence_position_in_line != -1:
+            last_setence_ending_text = (
+                last_setence_ending_text
+                + " "
+                + text_in_line[: end_of_sentence_position_in_line + 1]
+            )
+            break
+        else:
+            last_setence_ending_text = last_setence_ending_text + " " + text_in_line
+
+    return last_setence_ending_text
 
 
 def find_position_candidates_in_list(

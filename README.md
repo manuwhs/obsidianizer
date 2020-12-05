@@ -56,7 +56,7 @@ The [notebooks](./notebooks/) act as exmaples, documentation and test. The best 
 
 The [scripts](./scripts/) folder contains a set of CLI utilities. Most of the functionalities of this repo are accessed through the notebooks and the webapp as they require more complex inputs. These utilities contain simple specific use cases:
 
-- [email_tools.py](./scripts/email_tools.py): Tool to mainly download emails in latex format.
+- [email_tools.py](./scripts/email_tool.py): Tool to mainly download emails in latex format.
 
 
 # Webapp 

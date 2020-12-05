@@ -2,16 +2,32 @@
 import datetime as dt
 import itertools
 import re
+import string
 from collections import Counter
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import nltk
 import pandas as pd
 import spacy
 from nltk import ngrams
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
+
+
+def _compute_stop_words() -> List[str]:
+    """Computes the stopwords from nltk, gensim and spacy"""
+    sp_en = spacy.load("en_core_web_md")
+    spacy_stopwords_en = sp_en.Defaults.stop_words
+    # nltk.download("stopwords")
+    stopwords_nltk = stopwords.words("english")
+
+    total_stopwords = list(set([*spacy_stopwords_en, *stopwords_nltk]))
+    return total_stopwords
+
+
+STOPWORDS = _compute_stop_words()
 
 
 def remove_special_characters(sentence: str) -> str:
@@ -123,40 +139,36 @@ def join_list_of_lists_of_strings(words_series: pd.Series) -> str:
     return all_joined_text
 
 
-def get_most_used_words(journal_df: pd.DataFrame) -> pd.Series:
-    """It returns a list of the most used words"""
-    journal_df = journal_df.copy()
+def get_most_used_words(
+    sentences_series: pd.Series, remove_stopwords: bool = True
+) -> pd.Series:
+    """It returns a list of the most used words in the column passed as argument.
+    Each element of the argument is a sentence string"""
 
-    func = lambda sentences: list(  # noqa
-        itertools.chain.from_iterable(
-            [remove_special_characters(x).split() for x in sentences]
-        )
-    )
-    journal_df["words"] = journal_df["sentences"].apply(func)
-    words_series = pd.Series(
-        Counter(itertools.chain.from_iterable(journal_df["words"]))
-    ).sort_values(ascending=False)
+    def get_tokenized_words(sentence: Union[str, List[str]]):
+        if isinstance(sentence, list):
+            sentence = itertools.chain.from_iterable(sentence)
+        return sentence
+
+    # Join all sentences in the same string
+    all_concatenated_sentences = " ".join(sentences_series.apply(get_tokenized_words))
+    all_tokenized_words = remove_stop_words_en(all_concatenated_sentences)
+
+    words_series = pd.Series(Counter(all_tokenized_words)).sort_values(ascending=False)
     return words_series
 
 
-def remove_stop_words(words_series: pd.Series) -> pd.Series:
+def remove_stop_words_en(sentence: str) -> str:
     """Removes the stopwords"""
-    sp_en = spacy.load("en_core_web_sm")
-    sp_es = spacy.load("es_core_news_md")
+    # Remove punctuation
+    regex = re.compile("[%s]" % re.escape(string.punctuation))
+    sentence = regex.sub("", sentence)
 
-    spacy_stopwords_en = sp_en.Defaults.stop_words
-    spacy_stopwords_es = sp_es.Defaults.stop_words
-
+    text_tokens = word_tokenize(sentence)
     text_without_stopword = [
-        word for word in words_series if word.lower() not in spacy_stopwords_en
+        word for word in text_tokens if word.lower() not in STOPWORDS
     ]
-    text_without_stopword = [
-        word for word in text_without_stopword if word.lower() not in spacy_stopwords_es
-    ]
-
-    # words_series_filtered = words_series[text_without_stopword].map(str)
-    words_series_filtered = text_without_stopword
-    return words_series_filtered
+    return text_without_stopword
 
 
 def filter_entries_by_languages(
